@@ -1,0 +1,64 @@
+.root {
+  background-color: #fff;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 30px;
+}
+
+.inner {
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #4361ee;
+  color: #fff;
+  font-weight: 700;
+  line-height: 35px;
+  text-transform: uppercase;
+  letter-spacing: 0.15px;
+  border-radius: 5px;
+  padding: 0 15px;
+  text-decoration: none;
+
+  &:hover {
+    background-color: #8fa1f0;
+  }
+}
+
+.buttons {
+  button {
+    margin-left: 10px;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+.whaleLogo{
+width: 50px;
+height: 40px;
+
+}
+
+.avatar{
+  border-radius: 20px;
+  width: 35px;
+height: 35px;
+}
+.logout{
+  width: 26px;
+  height: 26px;
+}
+
+.headerRight{
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 30px;
+}
