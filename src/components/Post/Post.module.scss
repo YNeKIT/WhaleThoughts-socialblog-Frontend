@@ -177,6 +177,7 @@ $blue: #4361ee;
     }
 
     .commentUserAvatar {
+      cursor: pointer;
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -271,10 +272,6 @@ $blue: #4361ee;
   color: #4263f8;
 }
 
-
 .heart:hover{
-  cursor: pointer;
- 
-color: red($color: #fc1313);
-
+cursor: pointer;
 }

@@ -41,13 +41,13 @@ const  isAuth = useSelector(selectIsAuth);
   };
 
   if(isAuth) {
-    return <Navigate to="/" />
+    return <Navigate to="/home" />
   }
 
   return (
     <Paper classes={{ root: styles.root }}>
       <Typography classes={{ root: styles.title }} variant="h5">
-        Вход в аккаунт
+       Log IN 
       </Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         <TextField

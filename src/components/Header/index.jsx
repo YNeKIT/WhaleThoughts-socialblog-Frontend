@@ -24,7 +24,7 @@ export const Header = () => {
     }
 
     if(!isAuth) {
-      return <Navigate to="/login" />
+      return <Navigate to="/" />
     }
 
   };
@@ -43,27 +43,34 @@ export const Header = () => {
 
           <div className={styles.buttons}>
             <div className={styles.headerRight}>
+             
+            { isAuth ? (
+             <div className={styles.headerRight}  >
               <Link to={`/Messenger`}>
                 <CommentIcon />
                 <span>{4}</span>
               </Link>
 
-              {/* Render avatar with default or fetched URL */}
+            
               <Link to={"/Profile"}>
                 <img
                  src=
-                 {`http://localhost:4444${avatarSource}`}
+                 {`${process.env.REACT_APP_API_URL}${avatarSource}`}
                   className={styles.avatar}
                   alt="Avatar"
                 />
               </Link>
 
-              {!isAuth ? (
-                <Link to={`/Login`}>
-                  <img src={LogOut} className={styles.logout} alt="Logout" />
+             
+                <Link to={`/`}>
+                  <img src={LogOut} className={styles.logout} alt="Logout"
+                  
+                  onClick={onClickLogout}/>
                 </Link>
+</div>
+
               ) : (
-                <Link to={`/Login`}>
+                <Link to={`/`}>
                   <img
                     src={LogIn}
                     className={styles.logout}

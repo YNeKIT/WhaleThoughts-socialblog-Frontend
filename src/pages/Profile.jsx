@@ -109,7 +109,7 @@ export const Profile = () => {
               <Avatar
                 alt={userData?.fullName || "User Name"}
                 src=
-                {`http://localhost:4444${userData?.avatarUrl}`}
+                {`${process.env.REACT_APP_API_URL}${userData?.avatarUrl}`}
                 sx={{ width: 120, height: 120 }}
               />
               <input
@@ -136,7 +136,7 @@ export const Profile = () => {
             <Box display="flex" alignItems="center" mt={1}>
               <GroupIcon color="primary" fontSize="small" />
               <Typography variant="body2" color="textSecondary" ml={1}>
-                {userData?.friendsCount || 0} Friends
+                {userData?.friends.length || 0} Friends
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" mt={1}>
@@ -194,7 +194,7 @@ export const Profile = () => {
                   <CardMedia
                     component="img"
                     height="140"
-                    image={`http://localhost:4444${post.imageUrl}`}
+                    image={`${process.env.REACT_APP_API_URL}${post.imageUrl}`}
                     alt={post.title}
                   />
                   <CardContent>

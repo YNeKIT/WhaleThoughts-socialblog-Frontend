@@ -38,7 +38,7 @@ export const addCommentToPost = createAsyncThunk(
   async ({ postId, commentText, token }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `http://localhost:4444/post/${postId}/comments`,
+        `${process.env.REACT_APP_API_URL}/post/${postId}/comments`,
         { text: commentText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -170,12 +170,12 @@ const postSlice = createSlice({
         state.loading = false;
         state.error = null;
 
-        // Update the post in state with updated likes count
-        const updatedPost = action.payload; // Assuming backend returns updated post object
+      
+        const updatedPost = action.payload; 
         const updatedPosts = state.posts.items.map((post) =>
           post._id === updatedPost._id ? updatedPost : post
         );
-        state.posts.items = updatedPosts;
+        state.posts.items = updatedPosts   || "succes update post" ;
       })
       .addCase(toggleLikePost.rejected, (state, action) => {
         state.loading = false;

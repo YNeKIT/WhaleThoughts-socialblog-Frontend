@@ -1,12 +1,12 @@
 import React from 'react';
 import { List, ListItem, ListItemAvatar, ListItemText, Avatar, Typography, Box, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
-
-const friends = [
-  { id: 1, name: 'Alice', avatarUrl: 'https://via.placeholder.com/50', isOnline: true },
-  { id: 2, name: 'Bob', avatarUrl: 'https://via.placeholder.com/50', isOnline: false },
-  { id: 3, name: 'Charlie', avatarUrl: 'https://via.placeholder.com/50', isOnline: true },
-];
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { selectUserData } from "../redux/slices/auth";
+import Lottie from "lottie-react";
+import Nofriends from "../Icons/nofriends.json";
+import styles from './UserInfo/UserInfo.module.scss';
 
 const StyledBadge = styled(Badge)(({ theme, isOnline }) => ({
   '& .MuiBadge-badge': {
@@ -38,31 +38,51 @@ const StyledBadge = styled(Badge)(({ theme, isOnline }) => ({
 }));
 
 export const FriendList = () => {
+  const userData = useSelector(selectUserData); // Fetch user data
+  const navigate = useNavigate(); // Use the useNavigate hook
+
+  // Handler to navigate to user's profile
+  const handleFriendClick = (friendId) => {
+    navigate(`/userProfile/${friendId}`);
+  };
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
         Friends
       </Typography>
-      <List>
-        {friends.map((friend) => (
-          <ListItem key={friend.id} sx={{ padding: '10px 0' }}>
-            <ListItemAvatar>
-              <StyledBadge
-                overlap="circular"
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                variant="dot"
-                isOnline={friend.isOnline}
-              >
-                <Avatar alt={friend.name} src={friend.avatarUrl} />
-              </StyledBadge>
-            </ListItemAvatar>
-            <ListItemText
-              primary={friend.name}
-              primaryTypographyProps={{ variant: 'body1', fontWeight: 'medium' }}
-            />
-          </ListItem>
-        ))}
-      </List>
+      {userData?.friends.length > 0 ? (
+        <List>
+          {userData.friends.map((friend) => (
+            <ListItem 
+              key={friend._id} 
+              sx={{ padding: '10px 0' }}
+              button 
+              onClick={() => handleFriendClick(friend._id)} // Add click handler
+            >
+              <ListItemAvatar>
+                <StyledBadge
+                  overlap="circular"
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  variant="dot"
+                  isOnline={friend.isOnline || false} 
+                >
+                  <Avatar alt={friend.fullName} src={`${process.env.REACT_APP_API_URL}${friend.avatarUrl}`} />
+                </StyledBadge>
+              </ListItemAvatar>
+              <ListItemText
+                primary={friend.fullName}
+                primaryTypographyProps={{ variant: 'body1', fontWeight: 'medium' }}
+              />
+            </ListItem>
+          ))}
+        </List>
+      ) : (
+        <Typography variant="body1" color="textSecondary">
+          <Lottie className={styles.nofriends} animationData={Nofriends} loop={true} />
+          You have no friends yet.
+        </Typography>
+      )}
     </Box>
   );
 };

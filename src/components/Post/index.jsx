@@ -18,6 +18,11 @@ import {
 } from "../../redux/slices/posts";
 import { selectUserData } from "../../redux/slices/auth"; // Import fetchPostById action
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { useNavigate } from "react-router-dom";
+
+
+
+
 export const Post = ({
   id,
   title,
@@ -38,6 +43,7 @@ export const Post = ({
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState(comments);
   const userData = useSelector(selectUserData);
+  const navigate = useNavigate(); // Use the useNavigate hook
   // Fetch user data
   useEffect(() => {
     setLocalComments(comments);
@@ -77,6 +83,14 @@ export const Post = ({
     return <PostSkeleton />;
   }
 
+  
+
+  // Handler to navigate to user's profile
+  const handleFriendClick = (friendId) => {
+    navigate(`/userProfile/${friendId}`);
+  };
+
+
   const userHasLiked = likes.some((like) => like === userData?._id);
  
   return (
@@ -101,7 +115,7 @@ export const Post = ({
         />
       )}
       <div className={styles.wrapper}>
-        <UserInfo {...user} additionalText={createdAt} />
+        <UserInfo {...user}  handleFriendClick={handleFriendClick}  additionalText={createdAt} />
         <div className={styles.indention}>
           <h2
             className={clsx(styles.title, { [styles.titleFull]: isFullPost })}
@@ -166,9 +180,10 @@ export const Post = ({
               className={styles.comment}
             >
               <img
-                src={`http://localhost:4444${comment.user.avatarUrl}`}
+                src={`${process.env.REACT_APP_API_URL}${comment.user.avatarUrl}`}
                 alt={comment.user.fullName}
                 className={styles.commentUserAvatar}
+                onClick={() => handleFriendClick(comment.user._id)} // Add click handler
               />
               <div>
                 <div className={styles.commentUserName}>
