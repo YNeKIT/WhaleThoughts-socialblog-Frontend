@@ -47,7 +47,6 @@ export const Profile = () => {
   useEffect(() => {
     dispatch(fetchAuthMe());
     dispatch(fetchUserPosts());
-   
   }, [dispatch]);
 
   const handleOpenAddPostModal = () => {
@@ -99,7 +98,13 @@ export const Profile = () => {
     }
   };
 
-  
+  // Ensure userData?.avatarUrl is defined and doesn't start with a slash
+  const avatarUrl = userData?.avatarUrl
+    ? `${process.env.REACT_APP_API_URL}/${userData.avatarUrl.replace(/^\//, '')}`
+    : null;
+
+    console.log(`{${process.env.REACT_APP_API_URL}${userData?.avatarUrl}}`)
+
   return (
     <Container maxWidth="md">
       <Box my={4}>
@@ -108,8 +113,7 @@ export const Profile = () => {
             <label className={styles.avatar} htmlFor="avatar-upload">
               <Avatar
                 alt={userData?.fullName || "User Name"}
-                src=
-                {`${process.env.REACT_APP_API_URL}${userData?.avatarUrl}`}
+                src={avatarUrl}
                 sx={{ width: 120, height: 120 }}
               />
               <input
@@ -194,7 +198,7 @@ export const Profile = () => {
                   <CardMedia
                     component="img"
                     height="140"
-                    image={`${process.env.REACT_APP_API_URL}${post.imageUrl}`}
+                    image={`${process.env.REACT_APP_API_URL}/${post.imageUrl.replace(/^\//, '')}`}
                     alt={post.title}
                   />
                   <CardContent>
@@ -214,7 +218,7 @@ export const Profile = () => {
               </Grid>
             ))
           ) : (
-            <Typography className={styles.noposts}  >No posts available</Typography>
+            <Typography className={styles.noposts}>No posts available</Typography>
           )}
         </Grid>
       </Box>
