@@ -1,54 +1,37 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../axios";
 
-export const fetchAuth = createAsyncThunk(
-  "auth/fetchAuth",
+export const fetchAuth = createAsyncThunk("auth/fetchAuth", async (params) => {
+  const { data } = await axios.post("/auth/login", params);
+  return data;
+});
+
+export const fetchRegister = createAsyncThunk(
+  "auth/fetchRegister",
   async (params) => {
-    const { data } = await axios.post("/auth/login", params);
+    const { data } = await axios.post("/auth/register", params);
     return data;
   }
 );
 
-
-export const fetchRegister = createAsyncThunk('auth/fetchRegister', async (params) => {
-  const { data } = await axios.post('/auth/register', params);
+export const fetchAuthMe = createAsyncThunk("auth/fetchAuthMe", async () => {
+  const { data } = await axios.get("/auth/me");
   return data;
 });
-
-
-
-export const fetchAuthMe = createAsyncThunk('auth/fetchAuthMe', async () => {
-  const { data } = await axios.get('/auth/me');
-  return data;
-});
-
-
-export const uploadAvatar = createAsyncThunk('/upload/avatar', async (formData, { getState }) => {
-  try {
-    const { data } = await axios.post('/upload/avatar', formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${getState().auth.data.token}`, 
-      },
-    });
-    return data;
-  } catch (error) {
-    console.error("Error uploading avatar:", error);
-    throw error;
-  }
-});
-
-
 
 export const updateUserDescription = createAsyncThunk(
-  'auth/updateUserDescription',
+  "auth/updateUserDescription",
   async ({ description }, { getState }) => {
     try {
-      const { data } = await axios.put('/user/description', { description }, {
-        headers: {
-          Authorization: `Bearer ${getState().auth.data.token}`,
-        },
-      });
+      const { data } = await axios.put(
+        "/user/description",
+        { description },
+        {
+          headers: {
+            Authorization: `Bearer ${getState().auth.data.token}`,
+          },
+        }
+      );
       return data;
     } catch (error) {
       console.error("Error updating description:", error);
@@ -56,6 +39,7 @@ export const updateUserDescription = createAsyncThunk(
     }
   }
 );
+
 
 
 
@@ -67,11 +51,10 @@ const initialState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers:{
-logout: (state)=> {
-    state.data = null;
-}
-
+  reducers: {
+    logout: (state) => {
+      state.data = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -111,27 +94,14 @@ logout: (state)=> {
         state.status = "error";
         state.data = null;
       })
-      .addCase(uploadAvatar.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(uploadAvatar.fulfilled, (state, action) => {
-        state.status = "loaded";
-        state.data.avatarUrl = action.payload.avatarUrl;
-      })
-      .addCase(uploadAvatar.rejected, (state) => {
-        state.status = "error";
-      })
       .addCase(updateUserDescription.fulfilled, (state, action) => {
-      
         state.data.bio = action.payload.description;
       });
-
-
   },
 });
 
 export const selectIsAuth = (state) => Boolean(state.auth.data);
-export const selectUserData = (state) => state.auth.data; 
+export const selectUserData = (state) => state.auth.data;
 export const authReducer = authSlice.reducer;
 
-export const {logout} = authSlice.actions;
+export const { logout } = authSlice.actions;

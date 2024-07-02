@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Container,
   Grid,
@@ -24,14 +24,17 @@ import {
   selectIsAuth,
   selectUserData,
   updateUserDescription,
-  uploadAvatar,
 } from "../redux/slices/auth";
 import { fetchUserPosts } from "../redux/slices/posts";
 import GroupIcon from "@mui/icons-material/Group";
 import { AddPost } from "./AddPost";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import EditIcon from "@mui/icons-material/Edit";
-import styles from './AddPost/AddPost.module.scss';
+import axios from "axios";
+import styles from "./AddPost/AddPost.module.scss";
+
+
+
 
 export const Profile = () => {
   const isAuth = useSelector(selectIsAuth);
@@ -40,8 +43,12 @@ export const Profile = () => {
   const userPostsStatus = useSelector((state) => state.posts.userPosts.status);
   const [openAddPostModal, setOpenAddPostModal] = useState(false);
   const [openEditDescription, setOpenEditDescription] = useState(false);
-  const [avatarFile, setAvatarFile] = useState(null);
   const [description, setDescription] = useState(userData?.bio || "");
+
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -65,29 +72,6 @@ export const Profile = () => {
     setOpenEditDescription(false);
   };
 
-  const handleAvatarChange = (event) => {
-    const file = event.target.files[0];
-    setAvatarFile(file);
-  };
-
-  const handleAvatarUpload = async () => {
-    if (!avatarFile) return;
-
-    const formData = new FormData();
-    formData.append("image", avatarFile);
-
-    try {
-      const result = await dispatch(uploadAvatar(formData));
-      if (uploadAvatar.fulfilled.match(result)) {
-        console.log("Avatar uploaded successfully:", result.payload);
-      } else {
-        console.error("Avatar upload failed:", result.error.message);
-      }
-    } catch (error) {
-      console.error("Error uploading avatar:", error);
-    }
-  };
-
   const handleSaveDescription = async () => {
     try {
       await dispatch(updateUserDescription({ description }));
@@ -98,40 +82,86 @@ export const Profile = () => {
     }
   };
 
-  // Ensure userData?.avatarUrl is defined and doesn't start with a slash
-  const avatarUrl = userData?.avatarUrl
-    ? `${process.env.REACT_APP_API_URL}/${userData.avatarUrl.replace(/^\//, '')}`
-    : null;
+  const inputRef = useRef(null);
 
-    console.log(`{${process.env.REACT_APP_API_URL}${userData?.avatarUrl}}`)
+  const handleImageChange = (event) => {
+    setSelectedImage(event.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedImage) return;
+
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+
+    const token = localStorage.getItem("token"); 
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+
+    setUploading(true);
+    console.log("Uploading...");
+
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/uploadAvatar`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      setUploadedImageUrl(response.data.avatarUrl);
+      setUploading(false);
+    } catch (error) {
+      console.error("Error uploading the image:", error);
+      setUploading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (uploadedImageUrl) {
+      dispatch(fetchAuthMe());
+    }
+  }, [uploadedImageUrl, dispatch]);
+
+  const avatarUrl = userData?.avatarUrl
+    ? `${process.env.REACT_APP_API_URL}/${userData.avatarUrl.replace(
+        /^\//,
+        ""
+      )}`
+    : null;
 
   return (
     <Container maxWidth="md">
-      <Box my={4}>
+      <Box my={5}>
         <Grid container spacing={2} alignItems="center">
           <Grid item>
-            <label className={styles.avatar} htmlFor="avatar-upload">
-              <Avatar
-                alt={userData?.fullName || "User Name"}
-                src={avatarUrl}
-                sx={{ width: 120, height: 120 }}
-              />
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleAvatarChange}
-              />
-              <IconButton
-                className={styles.photoIcon}
-                color="primary"
-                aria-label="upload picture"
-                component="span"
-              >
-                <PhotoCameraIcon />
-              </IconButton>
-            </label>
+            <Avatar
+              alt={userData?.fullName || "User Name"}
+              src={avatarUrl || uploadedImageUrl}
+              sx={{ width: 120, height: 120 }}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleImageChange}
+              ref={inputRef}
+            />
+            <IconButton
+              color="primary"
+              aria-label="upload picture"
+              component="span"
+              onClick={() => inputRef.current.click()}
+            >
+              <PhotoCameraIcon />
+            </IconButton>
           </Grid>
           <Grid item>
             <Typography variant="h4">
@@ -171,11 +201,11 @@ export const Profile = () => {
                 variant="outlined"
                 color="primary"
                 size="small"
-                onClick={handleAvatarUpload}
-                disabled={!avatarFile}
                 style={{ marginLeft: 10 }}
+                onClick={handleUpload}
+                disabled={uploading}
               >
-                Upload Avatar
+                {uploading ? "Uploading..." : "Upload Avatar"}
               </Button>
             </Box>
           </Grid>
@@ -198,7 +228,9 @@ export const Profile = () => {
                   <CardMedia
                     component="img"
                     height="140"
-                    image={`${process.env.REACT_APP_API_URL}/${post.imageUrl.replace(/^\//, '')}`}
+                    image={`${
+                      process.env.REACT_APP_API_URL
+                    }/${post.imageUrl.replace(/^\//, "")}`}
                     alt={post.title}
                   />
                   <CardContent>
@@ -218,7 +250,9 @@ export const Profile = () => {
               </Grid>
             ))
           ) : (
-            <Typography className={styles.noposts}>No posts available</Typography>
+            <Typography className={styles.noposts}>
+              No posts available
+            </Typography>
           )}
         </Grid>
       </Box>
